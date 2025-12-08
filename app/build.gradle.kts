@@ -65,4 +65,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Add the Reorderable library dependency
+    implementation("sh.calvin.reorderable:reorderable:3.0.0")
 }

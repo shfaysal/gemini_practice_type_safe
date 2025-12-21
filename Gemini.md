@@ -103,3 +103,6 @@ I am sorry for the inconvenience. Is there anything else I can help you with?
 I have committed the changes. Is there anything else I can help you with?
 The changes have been pushed to the remote repository. Is there anything else I can help you with?
 I have saved the fact that the project has been successfully pushed to the remote repository. I will now save the chat.
+
+# Typography
+use ManropeFont as Font

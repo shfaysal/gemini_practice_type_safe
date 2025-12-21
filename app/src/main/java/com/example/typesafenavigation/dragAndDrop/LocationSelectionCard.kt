@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
@@ -55,6 +56,10 @@ fun LocationSelectionCard() {
     var active by remember { mutableStateOf<Int?>(null) } // 2 for stop, 3 for destination
     var dragDy by remember { mutableStateOf(0f) }
 
+    var originFocused by remember { mutableStateOf(false) }
+    var stopFocused by remember { mutableStateOf(false) }
+    var destinationFocused by remember { mutableStateOf(false) }
+
 
     fun swapLocations() {
         val temp = stopText
@@ -66,7 +71,10 @@ fun LocationSelectionCard() {
     val offsetDestination = if (active == 3) dragDy else 0f
 
     LaunchedEffect(dragDy, rowHeightPx, offsetStop, offsetDestination) {
-        Log.d("DRAGGABLE", "dragDy: $dragDy rowHeightPx: $rowHeightPx, offsetStop: $offsetStop, offsetDestination: $offsetDestination")
+        Log.d(
+            "DRAGGABLE",
+            "dragDy: $dragDy rowHeightPx: $rowHeightPx, offsetStop: $offsetStop, offsetDestination: $offsetDestination"
+        )
     }
 
 
@@ -102,19 +110,13 @@ fun LocationSelectionCard() {
                     ) {
                         Text(text = "A", color = Color.White)
                     }
-                    TextField(
+                    LocationTextField(
                         value = originText,
                         onValueChange = { originText = it },
-                        placeholder = { Text("Pickup") },
-                        modifier = Modifier.weight(1f),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            disabledContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            errorIndicatorColor = Color.Transparent
-                        )
+                        placeholder = "Pickup",
+                        isFocused = originFocused,
+                        onFocusChange = { originFocused = it },
+                        modifier = Modifier.weight(1f)
                     )
                 }
 
@@ -173,20 +175,14 @@ fun LocationSelectionCard() {
                                 Text(text = "B", color = Color.White)
                             }
                             Spacer(modifier = Modifier.width(8.dp))
-                            TextField(
+                            LocationTextField(
                                 value = stopText,
                                 onValueChange = { stopText = it },
-                                placeholder = { Text("Stop") },
-                                enabled = active == null,
+                                placeholder = "Stop",
+                                isFocused = stopFocused,
+                                onFocusChange = { stopFocused = it },
                                 modifier = Modifier.weight(1f),
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent,
-                                    disabledContainerColor = Color.Transparent,
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                    errorIndicatorColor = Color.Transparent
-                                )
+                                enabled = active == null
                             )
                         }
                     }
@@ -247,24 +243,18 @@ fun LocationSelectionCard() {
                             Text(text = if (showStopField) "C" else "B", color = Color.White)
                         }
                         Spacer(modifier = Modifier.width(8.dp))
-                        TextField(
+                        LocationTextField(
                             value = destinationText,
                             onValueChange = { destinationText = it },
-                            placeholder = { Text("Type your destination...") },
-                            enabled = active == null,
+                            placeholder = "Type your destination...",
+                            isFocused = destinationFocused,
+                            onFocusChange = { destinationFocused = it },
                             modifier = Modifier.weight(1f),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                disabledContainerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                errorIndicatorColor = Color.Transparent
-                            )
+                            enabled = active == null
                         )
                     }
                 }
-            }
+            } // Close the Column
 
             IconButton(onClick = { showStopField = !showStopField }) {
                 Icon(
@@ -272,8 +262,44 @@ fun LocationSelectionCard() {
                     contentDescription = if (showStopField) "Remove stop" else "Add stop"
                 )
             }
+        } // Close the Row
+    } // Close the Card
+} // Close the LocationSelectionCard function
+
+@Composable
+private fun LocationTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    isFocused: Boolean,
+    onFocusChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = { Text(placeholder) },
+        maxLines = 1,
+        singleLine = true,
+        modifier = modifier.onFocusChanged { onFocusChange(it.isFocused) },
+        enabled = enabled,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            errorIndicatorColor = Color.Transparent
+        ),
+        trailingIcon = {
+            if (value.isNotEmpty() && isFocused) {
+                IconButton(onClick = { onValueChange("") }) {
+                    Icon(Icons.Default.Clear, contentDescription = "Clear")
+                }
+            }
         }
-    }
+    )
 }
 
 @Preview(showBackground = true)
